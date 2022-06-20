@@ -107,7 +107,7 @@
 					// ipinfo在线请求
 					try{
 						let ip = '8.8.8.8'
-						let data = {'token': '0d1137ca43a776'}
+						let data = {'token': '自己申请的token'}
     				const res = await ipInfoLocation(ip, data);
     				if (res) {
 							this.tables.push([res])
@@ -133,7 +133,7 @@
 					// ipgeolocation在线请求
 					try{
 						let ip = '8.8.8.8'
-						let data = {'apiKey': '445d277b524f42318f2a784ed80a7515', 'ip': ip}
+						let data = {'apiKey': '自己注册的秘钥', 'ip': ip}
     				const res = await ipGeoLocation(data);
 						res['ipdb'] = 'IpGeoLocation在线'
 						res['url'] = 'https://ipgeolocation.io/'
