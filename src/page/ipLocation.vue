@@ -1,9 +1,22 @@
 <template>
   <div class="fillcontain">
     <head-top></head-top>
+		<div>
+			<el-form ref="form" :model="form" label-width="80px">
+				<el-form-item label="查询IP">
+					<el-input type="textarea" v-model="form.desc"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="searchIp">单IP查询</el-button>
+					<el-button type="primary" @click="searchIp">批量查询</el-button>
+					<el-button type="primary" @click="resetForm">清空</el-button>
+				</el-form-item>
+			</el-form>
+		</div>
 		<div class="table_container" v-for="(tableData, index) in tables" :key="index">
 			<!-- <p> {{index}}  => {{tableData}}}</p> -->
 			<el-table
+			v-loading="loading"
 			:data="tableData"
 			:key="index"
 			border
@@ -47,6 +60,25 @@
 			</el-table-column>
 		</el-table>
 		</div>
+
+		<!-- IP比较详情 -->
+		<div class="table_container">
+			<!-- <p> {{index}}  => {{tableData}}}</p> -->
+			<el-table
+			:data="batchCompareTableData"
+			border
+			style="width: 100%">
+	
+			<el-table-column
+				v-for="(item, index1) in dynamicCompareColumns"
+				:key="'key00' + index1"
+				:prop="item"
+				:label="item"
+				width="180"
+				>
+			</el-table-column>
+		</el-table>
+		</div>
   </div>
 
 </template>
@@ -57,6 +89,9 @@
   export default {
     data() {
       return {
+				form: {
+          desc: '1.1.1.1'
+        },
 				// 每个厂商的结果是一张表
         tables: [],
 				// 每个厂商的字段列表
@@ -64,24 +99,43 @@
 				// IP库信息
 				fixedColumns: [],
 				// 索引信息
-				indexs: []
+				indexs: [],
+				loading: true,
+				batchCompareTableData: [
+					{
+						"ip": "1.1.1.1",
+						"dbip": "CN",
+						"ipgeolocation": "SG",
+						"ipinfo": "ipinfo"
+					},
+					{
+						"ip": "1.1.1.2",
+						"dbip": "CN",
+						"ipgeolocation": "SG",
+						"ipinfo": "ipinfo"
+					}
+				],
+				dynamicCompareColumns: [
+					"ip", "dbip", "ipgeolocation", "ipinfo"
+				]
       }
     },
     components: {
       headTop
     },
 		mounted(){
-			this.initData();
+			// this.initData();
 		},
 		computed: {
 		},
 		methods: {
-    		async initData(){
+    		async searchIp(){
+					this.clearData()
 					let count = 1
+					let ip = this.form.desc
 					// dbip在线请求
 					// ipdbInfos.push({'prop': 'IP库', ''})
     			try{
-						let ip = '8.8.8.8'
     				const res = await dbipLocation(ip);
     				if (res) {
 							console.log('dbip result: ' + JSON.stringify(res))
@@ -102,12 +156,12 @@
     				}
     			}catch(err){
     				console.log('DBIP定位失败',err);
-    			}
+					}
 
 					// ipinfo在线请求
 					try{
-						let ip = '8.8.8.8'
-						let data = {'token': '自己申请的token'}
+						// let data = {'token': '自己申请的token'}
+						let data = {'token': '0d1137ca43a776'}
     				const res = await ipInfoLocation(ip, data);
     				if (res) {
 							this.tables.push([res])
@@ -132,8 +186,8 @@
 
 					// ipgeolocation在线请求
 					try{
-						let ip = '8.8.8.8'
-						let data = {'apiKey': '自己注册的秘钥', 'ip': ip}
+						// let data = {'apiKey': '自己注册的秘钥', 'ip': ip}
+						let data = {'apiKey': '445d277b524f42318f2a784ed80a7515', 'ip': ip}
     				const res = await ipGeoLocation(data);
 						res['ipdb'] = 'IpGeoLocation在线'
 						res['url'] = 'https://ipgeolocation.io/'
@@ -155,7 +209,30 @@
     			}catch(err){
     				console.log('IpGeoLocation定位失败',err);
     			}
-    		}
+					this.loading=false
+    		},
+				resetForm() {
+					this.form.desc = '1.1.1.1'
+					// 每个厂商的结果是一张表
+					this.tables = []
+					// 每个厂商的字段列表
+					this.dynamicColumns = []
+					// IP库信息
+					this.fixedColumns = []
+					// 索引信息
+					this.indexs = []
+				},
+				clearData() {
+					// 每个厂商的结果是一张表
+					this.tables = []
+					// 每个厂商的字段列表
+					this.dynamicColumns = []
+					// IP库信息
+					this.fixedColumns = []
+					// 索引信息
+					this.indexs = [],
+					this.loading = true
+				},
     	}
   }
 </script>
