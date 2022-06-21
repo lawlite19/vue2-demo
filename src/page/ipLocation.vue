@@ -8,7 +8,7 @@
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="searchIp">单IP查询</el-button>
-					<el-button type="primary" @click="searchIp">批量查询</el-button>
+					<el-button type="primary" @click="batchSearchIps">批量查询</el-button>
 					<el-button type="primary" @click="resetForm">清空</el-button>
 				</el-form-item>
 			</el-form>
@@ -101,23 +101,8 @@
 				// 索引信息
 				indexs: [],
 				loading: true,
-				batchCompareTableData: [
-					{
-						"ip": "1.1.1.1",
-						"dbip": "CN",
-						"ipgeolocation": "SG",
-						"ipinfo": "ipinfo"
-					},
-					{
-						"ip": "1.1.1.2",
-						"dbip": "CN",
-						"ipgeolocation": "SG",
-						"ipinfo": "ipinfo"
-					}
-				],
-				dynamicCompareColumns: [
-					"ip", "dbip", "ipgeolocation", "ipinfo"
-				]
+				batchCompareTableData: [],
+				dynamicCompareColumns: []
       }
     },
     components: {
@@ -211,6 +196,30 @@
     			}
 					this.loading=false
     		},
+				batchSearchIps () {
+					this.batchCompareTableData = [
+						{
+							"ip": "1.1.1.1",
+							"dbip": "CN",
+							"ipgeolocation": "SG",
+							"ipinfo": "ipinfo"
+						},
+						{
+							"ip": "1.1.1.2",
+							"dbip": "CN",
+							"ipgeolocation": "SG",
+							"ipinfo": "ipinfo"
+						}
+					]
+					if (this.batchCompareTableData.length > 0) {
+						this.dynamicCompareColumns = Object.keys(this.batchCompareTableData[0])
+					} else {
+						this.batchCompareTableData = {
+							"message": "查询失败",
+						}
+						this.dynamicCompareColumns = ['查询失败']
+					}
+				},
 				resetForm() {
 					this.form.desc = '1.1.1.1'
 					// 每个厂商的结果是一张表
