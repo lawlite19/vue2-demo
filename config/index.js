@@ -5,7 +5,7 @@
 const path = require('path')
 
 module.exports = {
-  dev: {
+  prod: {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
