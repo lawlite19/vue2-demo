@@ -9,6 +9,7 @@
 				<el-form-item>
 					<el-button type="primary" @click="searchIp">单IP查询</el-button>
 					<el-button type="primary" @click="batchSearchIps">批量查询</el-button>
+					<el-button type="primary" @click="exportExcel()">下载表格数据</el-button>
 					<el-button type="primary" @click="resetForm">清空</el-button>
 				</el-form-item>
 			</el-form>
@@ -65,12 +66,14 @@
 		<div class="table_container">
 			<!-- <p> {{index}}  => {{tableData}}}</p> -->
 			<el-table
+			id="out-table" 
 			:data="batchCompareTableData"
 			border
 			style="width: 100%">
-	
+			<!-- :render-header="renderHeader" -->
 			<el-table-column
 				v-for="(item, index1) in dynamicCompareColumns"
+				
 				:key="'key00' + index1"
 				:prop="item"
 				:label="item"
@@ -86,6 +89,8 @@
 <script>
   import headTop from '../components/headTop'
 	import {dbipLocation, ipInfoLocation, ipGeoLocation} from '../api/getData'
+	import FileSaver from 'file-saver'
+	import XLSX from 'xlsx'
   export default {
     data() {
       return {
@@ -200,7 +205,7 @@
 					this.batchCompareTableData = [
 						{
 							"ip": "1.1.1.1",
-							"dbip": "CN",
+							"dbip": "CN\n江苏省",
 							"ipgeolocation": "SG",
 							"ipinfo": "ipinfo"
 						},
@@ -217,8 +222,40 @@
 						this.batchCompareTableData = {
 							"message": "查询失败",
 						}
-						this.dynamicCompareColumns = ['查询失败']
+						this.dynamicCompareColumns = ['message']
 					}
+				},
+				renderHeader() {
+          return (
+              <div>
+                 <el-button type='primary' size='small' on-click={()=>this.exportExcel()}>导出表格</el-button>
+              </div>
+          )
+     		},
+				  // 导出功能
+        exportExcel() {
+          /* generate workbook object from table */
+          var wb = XLSX.utils.table_to_book(document.querySelector('#out-table'))
+          /* get binary string as output */
+          var wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'array' })
+          try {
+              FileSaver.saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'ip_result_' + this.getCurrentTime() + '.xlsx')
+          } catch (e) { 
+						if (typeof console !== 'undefined') console.log(e, wbout) 
+					}
+          return wbout
+         },
+				getCurrentTime() {
+        //获取当前时间并打印
+        	var _this = this;
+					let yy = new Date().getFullYear();
+					let mm = new Date().getMonth()+1;
+					let dd = new Date().getDate();
+					let hh = new Date().getHours();
+					let mf = new Date().getMinutes()<10 ? '0'+new Date().getMinutes() : new Date().getMinutes();
+					let ss = new Date().getSeconds()<10 ? '0'+new Date().getSeconds() : new Date().getSeconds();
+					let time = yy+'-'+mm+'-'+dd+'_'+hh+'_'+mf+'_'+ss;
+					return time
 				},
 				resetForm() {
 					this.form.desc = '1.1.1.1'
@@ -245,3 +282,13 @@
     	}
   }
 </script>
+
+<style lang="less" scoped>
+.fillcontain {
+	/deep/ .el-table {
+		 .cell {
+			white-space: pre-line;
+		}
+	}
+}
+</style>
